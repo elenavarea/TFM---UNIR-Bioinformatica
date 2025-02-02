@@ -70,7 +70,7 @@ library(dplyr)
   slice_max(abs_log_OR, n = 1) %>%   # Seleccionar el SNP con el mayor beta absoluto
   ungroup()  
   
-  
+  save(snps_selected,file="directorio/snps_selected.RData")
 
 #Extraer información del gen KDM4C  
 genes_info <- snp_gene(dat = "KDM4C", type = "hgnc", p = T)
