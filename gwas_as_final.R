@@ -126,3 +126,76 @@ for(i in 1:length(archivos)){
 	
 }
 
+###########################################
+########### UNION RESULTADOS ##############
+###########################################
+
+rm(list=ls())
+gc()
+
+require(lme4)
+
+
+archivos<-list.files()
+
+load(archivos[1])
+
+tabla<-plyr::ldply(res)
+
+info<-plyr::ldply(strsplit(tabla$SNP,split="[.]"))
+
+tabla$"CHR"<-info$"V1"
+tabla$"POS"<-info$"V2"
+tabla$"REF"<-info$"V3"
+tabla$"ALT"<-info$"V4"
+tabla$".id"<-NULL
+
+rm(info)
+
+# Unimos las tablas de resultados
+
+for(i in 2:length(archivos)){
+	
+	print(i)
+	
+	load(archivos[i])
+
+	tabla_unir<-plyr::ldply(res)
+
+	info<-plyr::ldply(strsplit(tabla_unir$SNP,split="[.]"))
+
+	tabla_unir$"CHR"<-info$"V1"
+	tabla_unir$"POS"<-info$"V2"
+	tabla_unir$"REF"<-info$"V3"
+	tabla_unir$"ALT"<-info$"V4"
+	tabla_unir$".id"<-NULL
+	
+	tabla<-rbind(tabla,tabla_unir)
+	
+	rm(tabla_unir,info)
+	
+}
+
+save(tabla,file="directorio/res_total.RData")
+
+
+table(tabla$"CHR")
+
+tabla$CHR<-as.numeric(tabla$CHR)
+
+tabla$POS<-as.numeric(tabla$POS)
+
+require("qqman")
+
+# reviso los valores
+range(tabla$P, na.rm = TRUE)
+tabla <- tabla[!is.na(tabla$P) & is.finite(tabla$P), ]
+
+range(tabla$OR, na.rm = TRUE)
+tabla <- tabla[!is.na(tabla$OR) & is.finite(tabla$OR), ]
+tabla <- tabla[tabla$OR != 0, ]
+range(tabla$OR)
+
+
+
+
